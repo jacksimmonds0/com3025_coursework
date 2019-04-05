@@ -24,7 +24,9 @@ if __name__ == '__main__':
     df_meta = pre_processing.get_df_meta()
 
     combined = pre_processing.filter_and_combine(df_reviews, df_meta)
-    reviews_clean = pre_processing.preprocess_reviews(combined['reviewTextProcessed'].tolist())
+
+    #it is now a list
+    reviews_clean = pre_processing.preprocess_reviews(combined[['reviewTextProcessed',].tolist())
     no_stop_words = pre_processing.remove_stop_words(reviews_clean)
     stemmed_reviews = pre_processing.get_stemmed_text(no_stop_words)
 
