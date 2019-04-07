@@ -1,7 +1,6 @@
 import pickle
 import argparse
 import os
-from pre_processing import PreProcessing
 from feature_vector import FeatureVector
 
 
@@ -11,7 +10,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # retrieve processed list from file
-    print("Attempting to use preprocessed reviews from file:" + args.input_file)
+    print("Attempting to use preprocessed review list from file:" + args.input_file)
     if not os.path.exists(args.input_file):
         raise Exception("File does not exist - please specify a valid file.")
     else:

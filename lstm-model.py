@@ -1,53 +1,30 @@
 import pickle
 import argparse
-import pandas as pd
-from pre_processing import PreProcessing
-from feature_vector import FeatureVector
+import os
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Embedding, LSTM, Dense, Dropout
-import os
 
 #mac hack
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("review_limit", help="the number of reviews to be processed")
+    parser.add_argument("input_file", help="the processed dataframe (reviews and sentiment) filename")
     args = parser.parse_args()
-    
-    try:
-        review_limit = int(args.review_limit)
-    except ValueError:
-        raise Exception("Review limit must be a number")
 
-    if review_limit < 100:
-        raise Exception("Review limit must be over 100")
-    # step 1 - pre processing the training data
-    # convert to combined pandas dataframe
-    # remving stopwords and stemming the review text
-    pre_processing = PreProcessing(limit_reviews=review_limit)
+    # retrieve preprocessed list from file
+    print("Attempting to use preprocessed dataframe (reviws and sentiment) from file:" + args.input_file)
+    if not os.path.exists(args.input_file):
+        raise Exception("File does not exist - please specify a valid file.")
+    else:
+        with open (args.input_file, 'rb') as fp:
+            reviews_and_sentiment = pickle.load(fp)
 
-    df_reviews = pre_processing.get_df_reviews()
-    df_meta = pre_processing.get_df_meta()
 
-    combined = pre_processing.filter_and_combine(df_reviews, df_meta)
-
-    reviews_and_sentiment = combined[['reviewTextProcessed', 'overall']]
-
-    # convert string values to numerical values
-    reviews_and_sentiment['overall'] = pd.to_numeric(reviews_and_sentiment['overall'])
-
-    # convert the rating value to 1 or 0
-    # if the average rating is 1, 2, 3 then 0 (negative sentiment)
-    # if the average rating is 4 or 5 then 1 (positive sentiment)
-    reviews_and_sentiment['sentiment'] = reviews_and_sentiment['overall'].apply(lambda x: 1 if x>3 else 0)
-    reviews_and_sentiment['sentiment'] = [1 if x > 3 else 0 for x in reviews_and_sentiment['overall']]
-
-    print(reviews_and_sentiment)
-
+    #more work to be done, comments needed
     X, y = (reviews_and_sentiment['reviewTextProcessed'].values, reviews_and_sentiment['sentiment'].values)
 
     tk = Tokenizer(lower = True)
