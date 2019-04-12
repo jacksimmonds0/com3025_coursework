@@ -23,8 +23,8 @@ class FeatureVector:
         else:
             reviews = self.reviews
 
-        ngram_vectorizer_tfidf = TfidfVectorizer()
-        ngram_vectorizer_tfidf.fit(reviews)
+        tfidf_vectorizer = TfidfVectorizer()
+        tfidf_vectorizer.fit(reviews)
         
-        return ngram_vectorizer_tfidf.transform(reviews)
+        return tfidf_vectorizer.transform(reviews)
         

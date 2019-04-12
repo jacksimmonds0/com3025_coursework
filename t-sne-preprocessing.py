@@ -29,7 +29,10 @@ if __name__ == '__main__':
     no_stop_words = pre_processing.remove_stop_words(reviews_clean)
     stemmed_reviews = pre_processing.get_stemmed_text(no_stop_words)
 
+    combined['reviewTextProcessed'] = stemmed_reviews
+
+    combined.to_csv(args.output_file, sep='\t', encoding='utf-8')
 
     #pickle the list of preprocessed reviews to file
-    with open(args.output_file, 'wb') as fp:
-        pickle.dump(stemmed_reviews, fp)
+    # with open(args.output_file, 'wb') as fp:
+    #     pickle.dump(stemmed_reviews, fp)
