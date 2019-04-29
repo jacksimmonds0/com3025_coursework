@@ -8,7 +8,6 @@ from feature_vector import FeatureVector
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
-from sklearn.decomposition import SparsePCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 if __name__ == '__main__':
@@ -24,16 +23,20 @@ if __name__ == '__main__':
         combined = pd.read_csv(args.input_file, sep='\t')
         combined = combined.dropna()
 
+
     # step 2 - converting to feature vectors
-    # using either ngrams or tf-idf
+    # using either ngrams or tf-idf or own word vectors (using gensim and word2vec)
     feature_vector = FeatureVector(combined['reviewTextProcessed'].tolist())
-    X = feature_vector.tfidf_vectorizer().toarray()
-    y = np.array(combined['overall'].tolist())
+    X, y = feature_vector.word2vec_gensim(combined['categories'].tolist())
+
+    unique = combined['categories'].unique()
+    print(unique)
+    print(len(unique))
+
 
     # step 3 - implement algorithms
     # either PCA or t-SNE??
-
-    pca = SparsePCA(n_components=2)
+    pca = PCA(n_components=2)
     X_r = pca.fit(X).transform(X)
 
     plt.figure()
@@ -45,6 +48,6 @@ if __name__ == '__main__':
                     label=target_name)
 
     plt.legend(loc='best', shadow=False, scatterpoints=1)
-    plt.title('PCA of Amazon dataset')
+    plt.title('PCA of Amazon reviews dataset')
 
     plt.show()

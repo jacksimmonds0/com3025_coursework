@@ -26,10 +26,11 @@ if __name__ == '__main__':
 
     combined = pre_processing.filter_and_combine(df_reviews, df_meta)
     reviews_clean = pre_processing.preprocess_reviews(combined['reviewTextProcessed'].tolist())
-    no_stop_words = pre_processing.remove_stop_words(reviews_clean)
-    stemmed_reviews = pre_processing.get_stemmed_text(no_stop_words)
+    # no_stop_words = pre_processing.remove_stop_words(reviews_clean)
+    # stemmed_reviews = pre_processing.get_stemmed_text(no_stop_words)
 
-    combined['reviewTextProcessed'] = stemmed_reviews
+    combined['reviewTextProcessed'] = reviews_clean
+    combined = pre_processing.change_categories_column(combined)
 
     combined.to_csv(args.output_file, sep='\t', encoding='utf-8')
 

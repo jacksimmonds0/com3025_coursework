@@ -65,6 +65,23 @@ class PreProcessing:
     def get_stemmed_text(self, corpus):
         return [' '.join([PorterStemmer().stem(word) for word in review.split()]) for review in corpus]
 
+    def change_categories_column(self, df):
+        categories = df['categories'].tolist()
+        single_categories = []
+
+        for cats in categories:
+            try:
+                single_categories.append(cats[0][2])
+            except IndexError:
+                single_categories.append('Electronics')
+
+        # replace the categories column with a single category for each item
+        # arbitrarily taking the 2nd category
+        df['categories'] = single_categories
+        
+        return df
+
+
     def get_df_reviews(self):
         return self.df_reviews
 
