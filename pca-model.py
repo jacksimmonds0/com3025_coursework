@@ -6,7 +6,7 @@ import numpy as np
 from feature_vector import FeatureVector
 
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
@@ -27,11 +27,24 @@ if __name__ == '__main__':
     # step 2 - converting to feature vectors
     # using either ngrams or tf-idf or own word vectors (using gensim and word2vec)
     feature_vector = FeatureVector(combined['reviewTextProcessed'].tolist())
-    X, y = feature_vector.word2vec_gensim(combined['categories'].tolist())
 
-    unique = combined['categories'].unique()
-    print(unique)
-    print(len(unique))
+    # train the word vectors on the entire training set corpus
+    w2v_model = feature_vector.word2vec_gensim()
+
+    # only plot the top 5 categories
+    common_cats = combined.categories.value_counts().nlargest(5).to_frame('count').rename_axis('categories').reset_index()
+    combined = pd.merge(combined, common_cats, how='inner', on=['categories'])
+
+    list_of_sent = feature_vector.get_list_of_sent(combined['reviewTextProcessed'].tolist())
+    X, y = feature_vector.avg_review_word_vector(list_of_sent, w2v_model, combined['categories'].tolist())
+
+    # taking a subset of 2000 reviews, of the same percentage for each category to plot
+    # difficult to visualise with >2000 reviews plotted
+    perc = 1 - (2000 / len(X))
+    splits = StratifiedShuffleSplit(n_splits=1, test_size=perc, random_state=0)
+    for train_index, test_index in splits.split(X, y):
+        X, X_test = X[train_index], X[test_index]
+        y, y_test = y[train_index], y[test_index]
 
 
     # step 3 - implement algorithms

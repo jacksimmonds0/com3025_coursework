@@ -30,10 +30,17 @@ class FeatureVector:
         return tfidf_vectorizer.transform(self.reviews)
 
 
-    def word2vec_gensim(self, y_list):
+    def word2vec_gensim(self):
+        list_of_sent = self.get_list_of_sent(self.reviews)
+        w2v_model = gensim.models.Word2Vec(list_of_sent, min_count=5, size=50, workers=4)
+
+        return w2v_model
+
+
+    def get_list_of_sent(self, reviews):
         list_of_sent = []
 
-        for sent in self.reviews:
+        for sent in reviews:
             filtered_sentence = []
             for w in sent.split():        
                 if(w.isalpha()):    
@@ -41,10 +48,7 @@ class FeatureVector:
 
             list_of_sent.append(filtered_sentence)
 
-        w2v_model=gensim.models.Word2Vec(list_of_sent,min_count=5,size=50, workers=4)
-        sent_vectors, y_list = self.avg_review_word_vector(list_of_sent, w2v_model, y_list)
-
-        return sent_vectors, np.array(y_list)
+        return list_of_sent
 
 
     def avg_review_word_vector(self, list_of_sent, w2v_model, y_list):
@@ -67,9 +71,9 @@ class FeatureVector:
                     pass
 
             sent_vec /= count_words
-            sent_vectors.append(sent_vec)                
+            sent_vectors.append(sent_vec)          
             count += 1
 
-        return sent_vectors, y_list
+        return np.array(sent_vectors), np.array(y_list)
         
         
