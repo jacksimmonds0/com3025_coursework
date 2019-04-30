@@ -7,7 +7,7 @@ from feature_vector import FeatureVector
 
 import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.decomposition import PCA
+from sklearn.manifold import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 if __name__ == '__main__':
