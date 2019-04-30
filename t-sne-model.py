@@ -10,7 +10,6 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import seaborn as sns
 
 
 if __name__ == '__main__':
@@ -26,7 +25,6 @@ if __name__ == '__main__':
         combined = pd.read_csv(args.input_file, sep='\t')
         combined = combined.dropna()
 
-   
 
     # step 2 - converting to feature vectors
     # using either ngrams or tf-idf or own word vectors (using gensim and word2vec)
@@ -51,32 +49,37 @@ if __name__ == '__main__':
         y, y_test = y[train_index], y[test_index]
 
 
-    feat_cols = [ 'pixel'+str(i) for i in range(X.shape[1]) ]
-    df = pd.DataFrame(X,columns=feat_cols)
+    # feat_cols = X
+    # df['feat_cols'] = X
+    df = pd.DataFrame()
     df['y'] = y
     df['label'] = df['y'].apply(lambda i: str(i))
-    df['y'] = pd.Series(pd.factorize(df['y']))
+    df['y'] = df.y.astype("category").cat.codes
     rndperm = np.random.permutation(df.shape[0])
+
+
     # step 3 - implement algorithms
     # either PCA or t-SNE?
-
     tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=300)
-    tsne_results = tsne.fit_transform(df[feat_cols].values)
-    df['tsne-one'] = tsne_results[:,0]
-df['tsne-two'] = tsne_results[:,1] 
-df['tsne-three'] = tsne_results[:,2]
-ax = plt.figure(figsize=(16,10)).gca(projection='3d')
-ax.scatter(
-    xs=df.loc[rndperm,:]["tsne-one"], 
-    ys=df.loc[rndperm,:]["tsne-two"], 
-    zs=df.loc[rndperm,:]["tsne-three"], 
-    c=df.loc[rndperm,:]["y"], 
-    cmap='tab10'
-)
-ax.set_xlabel('pca-one')
-ax.set_ylabel('pca-two')
-ax.set_zlabel('pca-three')
-plt.show()
-plt.title('t-SNE of Amazon reviews dataset')
+    tsne_results = tsne.fit_transform(X)
 
-plt.show()
+    df['tsne-one'] = tsne_results[:,0]
+    df['tsne-two'] = tsne_results[:,1] 
+    df['tsne-three'] = tsne_results[:,2]
+    ax = plt.figure(figsize=(16,10)).gca(projection='3d')
+
+    ax.scatter(
+        xs=df.loc[rndperm,:]["tsne-one"], 
+        ys=df.loc[rndperm,:]["tsne-two"], 
+        zs=df.loc[rndperm,:]["tsne-three"], 
+        c=df.loc[rndperm,:]["y"], 
+        cmap='gist_rainbow'
+    )
+
+
+    ax.set_xlabel('tsne-one')
+    ax.set_ylabel('tsne-two')
+    ax.set_zlabel('tsne-three')
+    plt.title('t-SNE of Amazon Reviews Dataset')
+
+    plt.show()

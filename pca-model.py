@@ -6,9 +6,9 @@ import numpy as np
 from feature_vector import FeatureVector
 
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.manifold import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.decomposition import PCA
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -52,15 +52,52 @@ if __name__ == '__main__':
     pca = PCA(n_components=2)
     X_r = pca.fit(X).transform(X)
 
-    plt.figure()
-    colors = ['red', 'navy', 'turquoise', 'darkorange', 'green']
-    lw = 2
 
-    for color, target_name in zip(colors, list(set(y))):
-        plt.scatter(X_r[y == target_name, 0], X_r[y == target_name, 1], color=color, alpha=.8, lw=lw,
-                    label=target_name)
+    type = '3D'
 
-    plt.legend(loc='best', shadow=False, scatterpoints=1)
-    plt.title('PCA of Amazon reviews dataset')
+    if type == '2D':
+        pca = PCA(n_components=2)
+        X_r = pca.fit(X).transform(X)
 
+        plt.figure()
+        colors = ['red', 'navy', 'turquoise', 'darkorange', 'green']
+        lw = 2
+
+        for color, target_name in zip(colors, list(set(y))):
+            plt.scatter(X_r[y == target_name, 0], X_r[y == target_name, 1], color=color, alpha=.8, lw=lw,
+                        label=target_name)
+
+        plt.legend(loc='best', shadow=False, scatterpoints=1)
+
+    elif type == '3D':
+        pca = PCA(n_components=3)
+        X_r = pca.fit(X).transform(X)
+
+        # change categories to integers for colouring the points
+        df = pd.DataFrame()
+        df['y'] = y
+        df['label'] = df['y'].apply(lambda i: str(i))
+        df['y'] = df.y.astype("category").cat.codes
+        rndperm = np.random.permutation(df.shape[0])
+
+        df['pca-one'] = X_r[:,0]
+        df['pca-two'] = X_r[:,1] 
+        df['pca-three'] = X_r[:,2]
+        ax = plt.figure(figsize=(16,10)).gca(projection='3d')
+
+        ax.scatter(
+            xs=df.loc[rndperm,:]["pca-one"], 
+            ys=df.loc[rndperm,:]["pca-two"], 
+            zs=df.loc[rndperm,:]["pca-three"], 
+            c=df.loc[rndperm,:]["y"], 
+            cmap='gist_rainbow'
+        )
+
+        ax.set_xlabel('pca-one')
+        ax.set_ylabel('pca-two')
+        ax.set_zlabel('pca-three')
+        plt.legend(loc='best', shadow=False, scatterpoints=1)
+
+
+    plt.title('PCA of Amazon Reviews Dataset')
     plt.show()
