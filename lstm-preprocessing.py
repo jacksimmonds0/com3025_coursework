@@ -26,6 +26,9 @@ if __name__ == '__main__':
     df_meta = pre_processing.get_df_meta()
 
     combined = pre_processing.filter_and_combine(df_reviews, df_meta)
+    combined['reviewTextProcessed'] = pre_processing.preprocess_reviews(combined['reviewTextProcessed'])
+    combined['reviewTextProcessed'] = pre_processing.remove_stop_words(combined['reviewTextProcessed'])
+    combined['reviewTextProcessed'] = pre_processing.get_stemmed_text(combined['reviewTextProcessed'])
 
     reviews_and_sentiment = combined[['reviewTextProcessed', 'overall']]
 
