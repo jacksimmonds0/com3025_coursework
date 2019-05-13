@@ -4,19 +4,22 @@ import os
 import pandas as pd
 import numpy as np
 from feature_vector import FeatureVector
+from sklearn.decomposition import PCA
+from sklearn.model_selection import StratifiedShuffleSplit
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.decomposition import PCA
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("input_file", help="the processed review list filename")
+    parser.add_argument("type", help="the type of model to visualise: PCA or t-SNE")
+    parser.add_argument("dimensions", help="the number of dimensions to use: 2D or 3D")
     args = parser.parse_args()
 
     # retrieve processed list from file
     print("Attempting to use preprocessed review list from file: " + args.input_file)
+    print("Using the model " + args.type + " in " + args.dimensions)
     if not os.path.exists(args.input_file):
         raise Exception("File does not exist - please specify a valid file.")
     else:
@@ -32,7 +35,8 @@ if __name__ == '__main__':
     w2v_model = feature_vector.word2vec_gensim()
 
     # only plot the top 5 categories
-    common_cats = combined.categories.value_counts().nlargest(5).to_frame('count').rename_axis('categories').reset_index()
+    #common_cats = combined.categories.value_counts().nlargest(5).to_frame('count').rename_axis('categories').reset_index()
+    common_cats = pd.DataFrame(['Digital Cameras', 'Routers', 'Radios', 'Video', 'Blank Media'], columns=['categories'])
     combined = pd.merge(combined, common_cats, how='inner', on=['categories'])
 
     list_of_sent = feature_vector.get_list_of_sent(combined['reviewTextProcessed'].tolist())
@@ -48,16 +52,15 @@ if __name__ == '__main__':
 
 
     # step 3 - implement algorithms
-    # either PCA or t-SNE??
-    pca = PCA(n_components=2)
-    X_r = pca.fit(X).transform(X)
-
-
-    type = '3D'
-
-    if type == '2D':
-        pca = PCA(n_components=2)
-        X_r = pca.fit(X).transform(X)
+    # either PCA or t-SNE
+    if args.dimensions == '2D':
+        
+        if args.type == 'PCA':
+            pca = PCA(n_components=2)
+            X_r = pca.fit(X).transform(X)
+        elif args.type == 't-SNE':
+            pca = PCA(n_components=2)
+            X_r = pca.fit(X).transform(X)
 
         plt.figure()
         colors = ['red', 'navy', 'turquoise', 'darkorange', 'green']
@@ -69,9 +72,14 @@ if __name__ == '__main__':
 
         plt.legend(loc='best', shadow=False, scatterpoints=1)
 
-    elif type == '3D':
-        pca = PCA(n_components=3)
-        X_r = pca.fit(X).transform(X)
+    elif arg.dimensions == '3D':
+        
+        if args.type == 'PCA':
+            pca = PCA(n_components=3)
+            X_r = pca.fit(X).transform(X)
+        elif args.type == 't-SNE':
+            tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=300)
+            tsne_results = tsne.fit_transform(X)
 
         # change categories to integers for colouring the points
         df = pd.DataFrame()
@@ -99,5 +107,5 @@ if __name__ == '__main__':
         plt.legend(loc='best', shadow=False, scatterpoints=1)
 
 
-    plt.title('PCA of Amazon Reviews Dataset')
+    plt.title(args.type + ' of Amazon Reviews Dataset')
     plt.show()
