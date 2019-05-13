@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from feature_vector import FeatureVector
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from sklearn.model_selection import StratifiedShuffleSplit
 
 import matplotlib.pyplot as plt
@@ -52,16 +53,16 @@ if __name__ == '__main__':
 
 
     # step 3 - implement algorithms
-    # either PCA or t-SNE
+    # either PCA or t-SNE in either 2D or 3D
     if args.dimensions == '2D':
         
         if args.type == 'PCA':
             pca = PCA(n_components=2)
             X_r = pca.fit(X).transform(X)
         elif args.type == 't-SNE':
-            pca = PCA(n_components=2)
-            X_r = pca.fit(X).transform(X)
-
+            tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
+            X_r = tsne.fit_transform(X)
+    
         plt.figure()
         colors = ['red', 'navy', 'turquoise', 'darkorange', 'green']
         lw = 2
@@ -72,14 +73,14 @@ if __name__ == '__main__':
 
         plt.legend(loc='best', shadow=False, scatterpoints=1)
 
-    elif arg.dimensions == '3D':
+    elif args.dimensions == '3D':
         
         if args.type == 'PCA':
             pca = PCA(n_components=3)
             X_r = pca.fit(X).transform(X)
         elif args.type == 't-SNE':
             tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=300)
-            tsne_results = tsne.fit_transform(X)
+            X_r = tsne.fit_transform(X)
 
         # change categories to integers for colouring the points
         df = pd.DataFrame()
@@ -88,22 +89,26 @@ if __name__ == '__main__':
         df['y'] = df.y.astype("category").cat.codes
         rndperm = np.random.permutation(df.shape[0])
 
-        df['pca-one'] = X_r[:,0]
-        df['pca-two'] = X_r[:,1] 
-        df['pca-three'] = X_r[:,2]
+        model_one = args.type + "-one"
+        model_two = args.type + "-two"
+        model_three = args.type + "-three"
+
+        df[model_one] = X_r[:,0]
+        df[model_two] = X_r[:,1] 
+        df[model_three] = X_r[:,2]
         ax = plt.figure(figsize=(16,10)).gca(projection='3d')
 
         ax.scatter(
-            xs=df.loc[rndperm,:]["pca-one"], 
-            ys=df.loc[rndperm,:]["pca-two"], 
-            zs=df.loc[rndperm,:]["pca-three"], 
+            xs=df.loc[rndperm,:][model_one], 
+            ys=df.loc[rndperm,:][model_two], 
+            zs=df.loc[rndperm,:][model_three], 
             c=df.loc[rndperm,:]["y"], 
             cmap='gist_rainbow'
         )
 
-        ax.set_xlabel('pca-one')
-        ax.set_ylabel('pca-two')
-        ax.set_zlabel('pca-three')
+        ax.set_xlabel(model_one)
+        ax.set_ylabel(model_two)
+        ax.set_zlabel(model_three)
         plt.legend(loc='best', shadow=False, scatterpoints=1)
 
 
